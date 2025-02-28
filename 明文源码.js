@@ -9,46 +9,33 @@
 // @ts-ignore
 import { connect } from 'cloudflare:sockets';
 
-// 统一读取 KV 中的数据
-async function getKVData(env, key) {
-    const value = await env.amclubs.get(key);  // 从 KV 空间中获取指定键名的值
-    return value ? String(value) : '';  // 如果找到数据，则返回字符串类型，否则返回空字符串
-}
-
-
 // Generate your own UUID using the following command in PowerShell:
 // Powershell -NoExit -Command "[guid]::NewGuid()"
 let userID = 'd0298536-d670-4045-bbb1-ddd5ea68683e';
+let kvUUID;
 
 // Proxy IPs to choose from
 let proxyIPs = [
 	'proxyip.amclubs.camdvr.org',
 	'proxyip.amclubs.kozow.com'
 ];
-
-let kvUUID, kvPROXYIP, kvIP_URL_TXT, kvIP_URL_CSV;
-
+let kvPROXYIP
 // 从 KV 中获取多个变量的值
 const kvCheckResponse = await checkKVNamespaceBinding(env);
 if (!kvCheckResponse) {
     kvUUID = await getKVData(env, 'userUUID');  // 获取存储 UUID 的值
     kvPROXYIP = await getKVData(env, 'proxyIP');  // 获取存储 PROXYIP 的值
-    kvIP_URL_TXT= await getKVData(env, 'IP_URL_TXT');  // 获取存储 IP_URL_TXT 的值
-    kvIP_URL_CSV = await getKVData(env, 'IP_URL_CSV');  // 获取存储 IP_URL_CSV 的值
 }
 
 // 默认值和优先级处理：如果 KV 中没有找到值，则使用默认值
 let userID = kvUUID || 'default-uuid';  // 如果没有找到 UUID，则使用默认 UUID
 let proxyIP = kvPROXYIP || 'default-proxy-ip';  // 如果没有找到 PROXYIP，则使用默认 PROXYIP
-let IP_URL_TXT = kvIP_URL_TXT || '';  // 默认的 DNS 解析器 URL
-let IP_URL_CSV = kvIP_URL_CSV || '';  // 默认的 API Host
 
 const url = new URL(request.url);
 const queryProxyIP = url.searchParams.get('PROXYIP');
 if (queryProxyIP) {
     proxyIP = queryProxyIP;  // 如果 URL 查询参数中有 PROXYIP，则覆盖
 }
-
 // Randomly select a proxy IP from the list
 let proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 let proxyPort = 443;
