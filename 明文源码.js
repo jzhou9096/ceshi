@@ -20,22 +20,7 @@ let proxyIPs = [
 	'proxyip.amclubs.kozow.com'
 ];
 let kvPROXYIP
-// 从 KV 中获取多个变量的值
-const kvCheckResponse = await checkKVNamespaceBinding(env);
-if (!kvCheckResponse) {
-    kvUUID = await getKVData(env, 'userUUID');  // 获取存储 UUID 的值
-    kvPROXYIP = await getKVData(env, 'proxyIP');  // 获取存储 PROXYIP 的值
-}
 
-// 默认值和优先级处理：如果 KV 中没有找到值，则使用默认值
-let userID = kvUUID || 'default-uuid';  // 如果没有找到 UUID，则使用默认 UUID
-let proxyIP = kvPROXYIP || 'default-proxy-ip';  // 如果没有找到 PROXYIP，则使用默认 PROXYIP
-
-const url = new URL(request.url);
-const queryProxyIP = url.searchParams.get('PROXYIP');
-if (queryProxyIP) {
-    proxyIP = queryProxyIP;  // 如果 URL 查询参数中有 PROXYIP，则覆盖
-}
 // Randomly select a proxy IP from the list
 let proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 let proxyPort = 443;
